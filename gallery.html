@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      /*
+    ==========================================
+    Roboto Google Font
+    ==========================================
+    */
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
+
+      /*
+    ==========================================
+    Universal Settings
+    ==========================================
+    */
+      * {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
+        outline: none;
+      }
+      html {
+        font-size: 62.5%;
+      }
+      body {
+        min-height: 100%;
+        background-color: #e0fdd8;
+        padding: 20px;
+      }
+      h2 {
+        text-align: center;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        color: #fff;
+        text-shadow: 0 0 2px #222;
+      }
+      .img-box {
+        max-width: 500px;
+        margin: auto;
+        margin-top: 40px;
+        position: relative;
+        overflow: hidden; /* Added overflow hidden */
+      }
+      .img-box .photo {
+        display: flex;
+        transition: transform 0.5s ease; /* Added transition for smooth sliding */
+      }
+      .img-box img {
+        max-width: 100%;
+      }
+      .arrow {
+        width: 20px;
+        color: red;
+        position: absolute;
+        transform: translateY(-50%);
+        top: 50%;
+        background-color: #fff;
+        padding: 10px 0;
+        width: 30px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-size: 20px;
+      }
+      .arrow-left {
+        left: 0;
+      }
+      .arrow-right {
+        right: 0;
+      }
+      .small-images {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        max-width: 500px;
+        margin: auto;
+        gap: 6px;
+        margin-top: 5px;
+      }
+      .small-images img {
+        max-width: 100%;
+        cursor: pointer;
+      }
+      .small-images img.active {
+        box-shadow: 0 0 0 1px red;
+      }
+      .boxx {
+        width: 300px;
+        background-color: red;
+        height: 200px;
+      }
+      .navigation {
+        text-align: center;
+        margin-top: 10rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        justify-content: center;
+      }
+      .navigation a {
+        display: inline-block;
+        font-size: 1.34rem;
+        font-weight: 500;
+        padding: 1.2rem 0;
+        width: 150px;
+        background-color: #206d02;
+        color: #fff;
+        transition: 0.1s ease;
+      }
+      .navigation a:hover {
+        opacity: 0.8;
+      }
+      @media screen and (max-width: 600px) {
+        body {
+          padding: 4rem 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Simple Gallery</h2>
+    <section class="img-box">
+      <div class="photo">
+        <img src="./images/food1.png" alt="food" />
+        <img src="./images/food2.png" alt="food" />
+        <img src="./images/food3.png" alt="food" />
+        <img src="./images/food4.png" alt="food" />
+        <img src="./images/food5.png" alt="food" />
+        <img src="./images/food6.png" alt="food" />
+      </div>
+      <div class="arrow arrow-left" onclick="prev()">
+        <i class="bi bi-chevron-left"></i>
+      </div>
+      <div class="arrow arrow-right" onclick="next()">
+        <i class="bi bi-chevron-right"></i>
+      </div>
+    </section>
+
+    <article class="small-images"></article>
+
+    <div class="navigation">
+      <a href="./index.html">Previous Project</a>
+      <a href="./photoEditor.html">Next Project</a>
+    </div>
+
+    <script>
+      let images = [
+        './images/food1.png',
+        './images/food2.png',
+        './images/food3.png',
+        './images/food4.png',
+        './images/food5.png',
+        './images/food6.png',
+      ]
+      let smallImgBox = document.querySelector('.small-images')
+      let displayImg = document.querySelector('.img-box .photo')
+      let storedIndex = 0
+
+      let newArr = images
+        .map((img) => `<img src="${img}" alt="image">`)
+        .join('')
+      smallImgBox.innerHTML = newArr
+      let smallImgs = document.querySelectorAll('.small-images>img')
+      smallImgs[0].classList.add('active')
+
+      smallImgs.forEach((img, index) => {
+        img.addEventListener('click', function (e) {
+          smallImgs.forEach((images, index2) => {
+            index === index2
+              ? images.classList.add('active')
+              : images.classList.remove('active')
+          })
+          storedIndex = index
+          updateImg(storedIndex)
+        })
+      })
+
+      function updateImg(i) {
+        displayImg.style.transform = `translateX(-${i * 100}%)` // Updated to slide images
+      }
+      updateImg(storedIndex)
+
+      //Clicking Next Arrow
+      function next() {
+        if (storedIndex < images.length - 1) {
+          storedIndex++
+        } else {
+          storedIndex = 0
+        }
+        updateImg(storedIndex)
+        smallImgs.forEach((img) => {
+          img.classList.remove('active')
+        })
+        smallImgs[storedIndex].classList.add('active')
+      }
+
+      //Clicking Prev Arrow
+      function prev() {
+        if (storedIndex === 0) {
+          storedIndex = images.length - 1
+        } else {
+          storedIndex--
+        }
+        updateImg(storedIndex)
+        smallImgs.forEach((img) => {
+          img.classList.remove('active')
+        })
+        smallImgs[storedIndex].classList.add('active')
+      }
+    </script>
+  </body>
+</html>

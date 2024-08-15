@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Editor</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+      * {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
+        outline: none;
+      }
+      html {
+        scroll-behavior: smooth;
+        font-size: 62.5%;
+      }
+      body {
+        min-height: 100vh;
+        background-color: rgb(249, 190, 190);
+        padding: 80px 0;
+      }
+      .scroll-container {
+        width: 100%;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: auto;
+        padding: 15px;
+      }
+      .container {
+        padding: 80px 10px;
+        width: 100%;
+        max-width: 500px;
+        background-color: #fff;
+      }
+      img {
+        width: 100%;
+        display: block;
+        margin: auto;
+      }
+      .uploading-photo {
+        text-align: center;
+      }
+      .uploading-photo input {
+        display: none;
+      }
+      label {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 40px;
+        border: 1.5px solid #333;
+        cursor: pointer;
+        border-radius: 10px;
+        font-size: 1.4rem;
+        font-weight: 500;
+      }
+      .panel {
+        position: fixed;
+        top: 0;
+        z-index: 20;
+        right: -900px;
+        height: 100%;
+        background-color: #fff;
+        padding: 20px;
+        width: 250px;
+        padding-top: 80px;
+        overflow-y: auto;
+        box-shadow: 0 0 5px #444;
+        transition: 0.2s ease all;
+      }
+      .panel.active {
+        right: 0px;
+      }
+      .panel i {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        cursor: pointer;
+        font-size: 20px;
+      }
+      .filter {
+        padding: 5px 10px;
+        border: 1px solid #444;
+        margin-bottom: 5px;
+      }
+      .filter p {
+        margin-bottom: 10px;
+        color: #222;
+        font-weight: 500;
+        font-size: 1.3rem;
+      }
+
+      /* Custom styles for the range input */
+      input[type='range'] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 5px;
+        background-color: #f4bebe;
+        border-radius: 0;
+        outline: none;
+        margin: 10px 0;
+      }
+
+      input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background-color: #0980d0;
+        border-radius: 0;
+        cursor: pointer;
+      }
+
+      input[type='range']::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background-color: #3498db;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      /* Additional styles for better cross-browser compatibility */
+      input[type='range']::-ms-track {
+        width: 100%;
+        cursor: pointer;
+        background: transparent;
+        border-color: transparent;
+        color: transparent;
+      }
+
+      input[type='range']::-ms-fill-lower,
+      input[type='range']::-ms-fill-upper {
+        background: #f3c2c2;
+        border-radius: 0;
+      }
+
+      input[type='range']::-ms-thumb {
+        height: 20px;
+        width: 20px;
+        background: #3498db;
+        border-radius: 0;
+        cursor: pointer;
+      }
+      #errorMessage {
+        position: fixed;
+        top: 20px;
+        transform: translateX(-50%);
+        left: 50%;
+        padding: 20px;
+        background-color: #fff;
+        color: #f8663d;
+        display: none;
+      }
+      #errorMessage.active {
+        display: block;
+      }
+      .down-load-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #f5461e;
+        border: 1.5px solid #000;
+        color: #fff;
+        display: inline-block;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1.4rem;
+      }
+      .edit-btn {
+        position: fixed;
+        top: 20px;
+        right: 25px;
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #0980d0;
+        color: #fff;
+        border: 1.5px solid #333;
+      }
+      .navigation {
+        text-align: center;
+        margin-top: 10rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        justify-content: center;
+      }
+      .navigation a {
+        display: inline-block;
+        font-size: 1.34rem;
+        font-weight: 500;
+        padding: 1.2rem 0;
+        width: 150px;
+        background-color: #206d02;
+        color: #fff;
+        transition: 0.1s ease;
+      }
+      .navigation a:hover {
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="scroll-container">
+      <article class="container">
+        <h2
+          style="
+            text-align: center;
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+          "
+        >
+          Photo Editor
+        </h2>
+        <div class="uploading-photo">
+          <img id="uploadedPhoto" src="" />
+          <input type="file" id="photo" onchange="handleFileChange()" />
+          <label for="photo">Upload Photo</label>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+      </article>
+    </section>
+
+    <article class="panel">
+      <i class="bi bi-dash-square"></i>
+      <div class="filters">
+        <div class="filter">
+          <p><span>Brightness</span>:</p>
+          <input type="range" value="100" min="5" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Contrast</span>:</p>
+          <input type="range" value="100" min="5" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Grayscale</span>:</p>
+          <input type="range" value="0" min="0" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Invert</span>:</p>
+          <input type="range" value="0" min="0" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Opacity</span>:</p>
+          <input type="range" value="100" min="5" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Saturate</span>:</p>
+          <input type="range" value="100" min="5" max="100" />
+        </div>
+        <div class="filter">
+          <p><span>Sepia</span>:</p>
+          <input type="range" value="0" min="0" max="100" />
+        </div>
+      </div>
+    </article>
+
+    <button class="edit-btn">Edit</button>
+
+    <div class="navigation">
+      <a href="./gallery.html">Previous Project</a>
+    </div>
+
+    <script>
+      // JavaScript logic
+      const input = document.getElementById('photo')
+      const img = document.getElementById('uploadedPhoto')
+      const errorMessage = document.getElementById('errorMessage')
+      let editedImageUrl = null
+
+      function handleFileChange() {
+        const file = input.files[0]
+
+        if (file) {
+          const validImageTypes = ['image/jpeg', 'image/png']
+
+          if (validImageTypes.includes(file.type)) {
+            const reader = new FileReader()
+
+            reader.onload = function (e) {
+              img.src = e.target.result
+              appendDownloadButton() // Call function to append download button
+              errorMessage.textContent = '' // Clear any previous error messages
+              errorMessage.classList.remove('active')
+            }
+
+            reader.readAsDataURL(file)
+          } else {
+            // Display an error message for invalid file type
+            errorMessage.textContent =
+              'Error: Please select a valid JPEG or PNG file.'
+            errorMessage.classList.add('active')
+            img.src = '' // Clear the image if the file is invalid
+            removeDownloadButton() // Call function to remove download button
+          }
+        } else {
+          // Handle case when no file is selected
+          img.src = ''
+          errorMessage.textContent = ''
+          errorMessage.classList.remove('active')
+          removeDownloadButton() // Call function to remove download button
+        }
+      }
+
+      function appendDownloadButton() {
+        const downloadButton = document.createElement('a')
+        downloadButton.classList.add('down-load-btn')
+        downloadButton.textContent = 'Download Edited Image'
+        downloadButton.addEventListener('click', handleDownload)
+        document.body.appendChild(downloadButton)
+      }
+
+      function removeDownloadButton() {
+        const downloadButton = document.querySelector(
+          'a[download="edited_image"]'
+        )
+        if (downloadButton) {
+          downloadButton.remove()
+        }
+      }
+
+      function handleDownload() {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        ctx.filter = getComputedStyle(img).filter
+        ctx.drawImage(img, 0, 0)
+
+        editedImageUrl = canvas.toDataURL()
+        this.href = editedImageUrl
+        this.download = 'edited_image'
+      }
+
+      let filters = {
+        brightness: 100,
+        sepia: 0,
+        saturate: 100,
+        opacity: 100,
+        invert: 0,
+        grayscale: 0,
+        contrast: 100,
+      }
+
+      let filterInputs = document.querySelectorAll('.filter input')
+
+      filterInputs.forEach((range) => {
+        range.addEventListener('input', (e) => {
+          let previousElem = e.target.previousElementSibling
+          let prop = previousElem.querySelector('span').innerText.toLowerCase()
+
+          filters[prop] = e.target.value
+          applyFilter(filters)
+        })
+      })
+
+      function applyFilter(obj) {
+        let str = ''
+        for (let p in obj) {
+          str += `${p}(${obj[p]}%) `
+        }
+
+        // Add vendor prefixes for better cross-browser compatibility
+        img.style.filter = str
+        img.style.webkitFilter = str
+        img.style.mozFilter = str
+        img.style.msFilter = str
+        img.style.oFilter = str
+      }
+
+      let editBtn = document.querySelector('.edit-btn')
+      let panel = document.querySelector('.panel')
+      let removePanel = document.querySelector('.bi-dash-square')
+
+      editBtn.addEventListener('click', function () {
+        panel.classList.add('active')
+      })
+      removePanel.addEventListener('click', function () {
+        panel.classList.remove('active')
+      })
+    </script>
+  </body>
+</html>
